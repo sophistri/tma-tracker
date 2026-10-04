@@ -1,4 +1,5 @@
 const { MongoClient } = require('mongodb')
+const { seedEpisodes } = require('./seed');
 
 const MONGO_URL = 'mongodb://localhost:27017';
 let client = null, db = null, error = null, connecting = null;  // standard status state vaariiaaaableees
@@ -11,6 +12,7 @@ async function connect() {
     db = client.db('the_archive');
     await ensureIndexes();
     await migrateFears();
+    await seedEpisodes(db);   // first run only: adds the 200 statements
     error = null;
     console.log('Mongo connected');
   } catch (err) {

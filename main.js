@@ -13,8 +13,11 @@ require('./src/main/ipc/episodes');
 // loads webpage into a new wndow instance
 const createWindow = () => {
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1180,
+    height: 760,
+    minWidth: 900,
+    minHeight: 600,
+    icon: path.join(__dirname, 'art', 'icon.png'),   // the cassette
     webPreferences: {
       // path.join ensures an absolute path, which Electron requires
       preload: path.join(__dirname, 'preload.js'),

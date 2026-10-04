@@ -8,6 +8,7 @@
 </head>
 <body>
   <aside id="side">
+    <img id="logo" src="art/icon.png" alt="" />
     <h1>The Archive</h1>
     <nav id="nav">
       <button data-view="home" class="on">Reading room</button>
@@ -35,6 +36,7 @@
           <div id="hero">
             <h2>Welcome back, Archivist</h2>
             <p id="hero-sub"></p>
+            <div class="segbar"><span id="hero-fill"></span></div>
           </div>
           <h3>The drawers</h3>
           <div id="tiles"></div>
@@ -129,6 +131,11 @@
       <div id="map-legend"></div>
       <div id="map-wrap">
         <svg id="map-svg"></svg>
+        <div id="map-zoom">
+          <button id="map-zoom-in" title="Zoom in">+</button>
+          <button id="map-zoom-out" title="Zoom out">&minus;</button>
+          <button id="map-fit" title="Fit everything in view">Fit</button>
+        </div>
         <p id="map-empty" hidden>No links to draw yet. Add some under an entry's Cross-references.</p>
       </div>
     </section>
@@ -171,6 +178,7 @@
         <div class="rel-add">
           <input id="rel-target" list="ent-names" placeholder="Other entry" />
           <input id="rel-kind" list="kinds" placeholder="Relationship" />
+          <label class="check" title="Reads the same from both ends, e.g. friend of"><input type="checkbox" id="rel-mutual" /> Two-way</label>
           <button type="button" id="rel-add">Add</button>
         </div>
         <h3>Appears in</h3>
@@ -213,6 +221,7 @@
   <script src="src/renderer/home.js"></script>
   <script src="src/renderer/relmap.js"></script>
   <script src="src/renderer/timeline.js"></script>
+  <script src="src/renderer/chrome.js"></script>
   <script src="src/renderer/app.js"></script>
 </body>
 </html>

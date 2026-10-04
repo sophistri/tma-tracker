@@ -1,7 +1,7 @@
 // a big drawer button: category name and how many entries it holds
 function drawer(name, count, color, onClick) {
   const b = el('button', 'drawer');
-  b.style.borderLeft = `10px solid ${color}`;
+  b.style.setProperty('--folder', color);   // the folder is painted in the category's colour (see .drawer in style.css)
   b.append(el('strong', '', name), el('span', '', String(count)));
   b.onclick = onClick;
   return b;
@@ -37,6 +37,8 @@ function renderHome() {
   $('hero-sub').textContent =
     `${plural(S.entities.length, 'entry', 'entries')}, ${plural(S.episodes.length, 'statement')}, ` +
     `${indexed}/${S.episodes.length} statements indexed`;
+  // the progress bar under it: how much of the archive has at least one entry indexed
+  $('hero-fill').style.width = (S.episodes.length ? Math.round((indexed / S.episodes.length) * 100) : 0) + '%';
 
   // the last statement you opened, if it still exists
   const last = S.episodes.find((ep) => ep._id === store.get('lastEp'));

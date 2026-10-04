@@ -147,7 +147,8 @@ function renderRels() {
     if (other) open.style.borderLeftColor = typeOf(other.type).color;
     open.append(
       el('strong', '', other ? other.name : '(missing entry)'),
-      el('span', '', `${l.a === editId ? '' : '← '}${l.kind || 'linked to'}${other ? ' · ' + other.ref : ''}`)
+      // ↔ = two-way (reads the same from both ends); ← = a one-way link that points at this entry
+      el('span', '', `${l.mutual ? '↔ ' : (l.a === editId ? '' : '← ')}${l.kind || 'linked to'}${other ? ' · ' + other.ref : ''}`)
     );
 
 
@@ -163,7 +164,13 @@ function renderRels() {
     x.title = 'Remove cross-reference';
     x.onclick = async () => { if (await call('deleteLink', l._id)) refresh(); };
 
-    row.append(open, x);
+    // flips a link between one-way and two-way (the whole link is sent back so nothing else changes)
+    const flip = el('button', 'small', l.mutual ? '↔' : '→');
+    flip.type = 'button';
+    flip.title = l.mutual ? 'Two-way. Click to make it one-way' : 'One-way. Click to make it two-way';
+    flip.onclick = async () => { if (await call('saveLink', { ...l, mutual: !l.mutual })) refresh(); };
+
+    row.append(open, flip, x);
     return row;
   }) : [el('p', 'empty', 'No cross-references yet.')]));
 
@@ -185,14 +192,24 @@ $('rel-add').onclick = async () => {
   if (!target || target._id === editId) return toast('Pick another entry from the list.');
 
   const kind = $('rel-kind').value.trim() || 'linked to';
-  const exists = S.links.some((l) => l.a === editId && l.b === target._id && l.kind === kind);
+  const mutual = $('rel-mutual').checked;
+  // a two-way link counts in both directions, so "A friend of B" blocks adding "B friend of A"
+  const exists = S.links.some((l) => (l.kind || '').toLowerCase() === kind.toLowerCase() && (
+    (l.a === editId && l.b === target._id) ||
+    ((l.mutual || mutual) && l.a === target._id && l.b === editId)));
   if (exists) return toast('That cross-reference already exists.');
 
-  if (!(await call('saveLink', { a: editId, b: target._id, kind }))) return;
+  if (!(await call('saveLink', { a: editId, b: target._id, kind, mutual }))) return;
   $('rel-target').value = '';
   $('rel-kind').value = '';
+  $('rel-mutual').checked = false;
   refresh();
 };
+
+// words like "friend of" read the same from both sides, so tick Two-way for them
+$('rel-kind').addEventListener('input', () => {
+  if (TWO_WAY_KINDS.includes($('rel-kind').value.trim().toLowerCase())) $('rel-mutual').checked = true;
+});
 
 // hopefully this will add relationships b/w entries?
 ['rel-target', 'rel-kind'].forEach((id) =>

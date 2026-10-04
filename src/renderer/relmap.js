@@ -5,6 +5,7 @@ let mapFocus = null;      // _id of the entry the map is centred on; null means 
 let mapDepth = 1;         // how many links away from the focused entry to include
 let mapType = 'all';      // only show this type of entry ('all' or a key of TYPES)
 let mapUnlinked = false;  // include entries that have no links at all (whole-archive mode only)
+let mapFit = { x: 0, y: 0, w: 1000, h: 700 };   // the view that fits everything: the Fit button goes back to it
 let mapBox = { x: 0, y: 0, w: 1000, h: 700 };   // the part of the drawing you can currently see (the SVG viewBox)
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -248,8 +249,8 @@ function renderMap() {
 
   // an arrowhead, used at the end of every link
   const defs = svgEl('defs');
-  const marker = svgEl('marker', { id: 'arrow', viewBox: '0 0 10 10', refX: '9', refY: '5', markerWidth: '8', markerHeight: '8', orient: 'auto' });
-  marker.append(svgEl('path', { d: 'M 0 0 L 10 5 L 0 10 z', fill: '#8e97ab' }));
+  const marker = svgEl('marker', { id: 'arrow', viewBox: '0 0 10 10', refX: '9', refY: '5', markerWidth: '8', markerHeight: '8', orient: 'auto-start-reverse' });   // auto-start-reverse: the same arrow also works at the start of a line
+  marker.append(svgEl('path', { d: 'M 0 0 L 10 5 L 0 10 z', fill: '#c9a878' }));
   defs.append(marker);
   svg.append(defs);
 
@@ -262,8 +263,10 @@ function renderMap() {
     const key = [l.a, l.b].sort().join('|');
     const nth = (seen[key] = (seen[key] || 0) + 1) - 1;   // stagger the words when two entries share several links
 
-    const g = svgEl('g', { class: 'medge', 'data-a': l.a, 'data-b': l.b });
-    g.append(svgEl('line', { x1: from.x, y1: from.y, x2: to.x, y2: to.y, 'marker-end': 'url(#arrow)' }));
+    const g = svgEl('g', { class: 'medge' + (l.mutual ? ' mutual' : ''), 'data-a': l.a, 'data-b': l.b });
+    const line = svgEl('line', { x1: from.x, y1: from.y, x2: to.x, y2: to.y, 'marker-end': 'url(#arrow)' });
+    if (l.mutual) line.setAttribute('marker-start', 'url(#arrow)');   // a two-way link points both ways
+    g.append(line);
     if (l.kind) {
       const t = svgEl('text', { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 - 6 + nth * 15 });
       t.textContent = l.kind;
@@ -300,6 +303,7 @@ function renderMap() {
   const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
   const w = Math.max(maxX - minX + 80, 400), h = Math.max(maxY - minY + 80, 260);
   mapBox = { x: (minX + maxX) / 2 - w / 2, y: (minY + maxY) / 2 - h / 2, w, h };
+  mapFit = { ...mapBox };
   applyBox();
 
   // a short sentence under the controls, and a key to the colours in use
@@ -340,13 +344,26 @@ function svgPoint(ev) {
   return pt.matrixTransform(svg.getScreenCTM().inverse());   // screen pixels -> drawing coordinates
 }
 
+// scale the visible area by k around the point (px, py), so that point stays where it is on screen
+// (k below 1 zooms in, above 1 zooms out)
+function zoomAt(px, py, k) {
+  const w = mapBox.w * k;
+  if (w < 120 || w > 60000) return;   // don't zoom into a speck, or out into nothing
+  mapBox = { x: px - (px - mapBox.x) * k, y: py - (py - mapBox.y) * k, w, h: mapBox.h * k };
+  applyBox();
+}
+
 $('map-svg').addEventListener('wheel', (ev) => {
   ev.preventDefault();
-  const p = svgPoint(ev), k = ev.deltaY < 0 ? 0.85 : 1 / 0.85;
-  // scale the visible area around the cursor, so the point under the mouse stays put
-  mapBox = { x: p.x - (p.x - mapBox.x) * k, y: p.y - (p.y - mapBox.y) * k, w: mapBox.w * k, h: mapBox.h * k };
-  applyBox();
+  const p = svgPoint(ev);
+  zoomAt(p.x, p.y, ev.deltaY < 0 ? 0.85 : 1 / 0.85);   // zoom around the cursor
 }, { passive: false });
+
+// the buttons zoom around the middle of what you can see
+const zoomMiddle = (k) => zoomAt(mapBox.x + mapBox.w / 2, mapBox.y + mapBox.h / 2, k);
+$('map-zoom-in').onclick = () => zoomMiddle(0.8);
+$('map-zoom-out').onclick = () => zoomMiddle(1 / 0.8);
+$('map-fit').onclick = () => { mapBox = { ...mapFit }; applyBox(); };
 
 $('map-svg').addEventListener('mousedown', (ev) => {
   if (ev.button !== 0 || ev.target.closest('.mnode')) return;
