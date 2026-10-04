@@ -1,0 +1,262 @@
+* { box-sizing: border-box; }
+
+/*the hidden attribute is a weak browser default, 
+and any rule that sets display on the same element overrides it. 
+This rule makes hidden always win. */
+
+[hidden] { display: none !important; } 
+
+body { margin: 0; height: 100vh; display: flex; font-family: sans-serif; }
+
+#side { width: 220px; flex: none; padding: 16px; background: #1d222e; color: #f6ebdd; }
+#nav { display: flex; flex-direction: column; gap: 8px; }
+#nav button.on { background: #f0966e; }
+
+#content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.view { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+#dbbar { padding: 8px 16px; background: #f0966e; }
+
+
+/* TOAST CONTAINER */
+
+/* Overriding default popover styles */
+#toast {
+  position: fixed;
+  inset: auto 16px 16px auto;
+  margin: 0;
+  border: none;
+  padding: 10px 14px;
+  /* Your default background and text colors */
+  background: #f0966e;
+  color: #14171f;
+  overflow: visible;            /* NEW: don't clip flying particles */
+
+  /* HIDES IT BY DEFAULT: Only display flex when open */  
+  display: none;
+}
+
+#toast:popover-open {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Your specific state background overrides */
+#toast.ok { background: #9ac2ba; }
+
+/* NEW: state while crumbling (replaces the inline style hacks) */
+#toast.is-destroying {
+  background: transparent;
+  box-shadow: none;
+}
+#toast.is-destroying > :not(.disintegrate-container) {
+  opacity: 0;
+}
+
+
+/* Sizing for the injected image */
+.toast-icon {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+
+/* The Fragment Overlay Container */
+.disintegrate-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Individual Pixel Dust Particles */
+.pixel-dust {
+  position: absolute;
+  width: var(--pixel-size);
+  height: var(--pixel-size);
+  background-color: var(--color);
+  /* duration and delay are overridden inline by the JS */
+  animation: explodeDust 1s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+
+
+/* Hardware accelerated dust burst trajectory */
+@keyframes explodeDust {
+  0%   { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+  50%  { opacity: 0.8; }
+  100% { transform: translate3d(var(--x), var(--y), 0) scale(0.2); opacity: 0; }
+}
+
+
+
+
+/* for catalog */
+.bar { display: flex; align-items: center; gap: 16px; padding: 12px 16px; background: #556787; color: #f6ebdd; }
+.bar h2 { margin: 0; }
+.bar input { margin-left: auto; max-width: 340px; width: 100%; }
+
+#cat-chips, #cat-letters { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 16px 0; }
+.chip.on, .letter.on { background: #f0966e; }
+.letter:disabled { opacity: .3; }
+
+#cat-list {
+  flex: 1; overflow: auto; padding: 36px 16px 16px;
+  display: grid; gap: 44px 16px; align-content: start;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+.fcard { position: relative; background: #f6ebdd; color: #14171f; padding: 16px; cursor: pointer; }
+.fcard .tab { position: absolute; left: 12px; top: -24px; padding: 4px 8px; font-size: 12px; color: #14171f; }
+.fcard h3 { margin: 0 0 6px; border-bottom: 2px solid #f25e45; padding-bottom: 6px; }
+.fcard p { margin: 4px 0 0; }
+.fcard .meta { font-size: 13px; color: #7a6c58; }
+.empty { grid-column: 1 / -1; opacity: .7; }
+
+
+dialog { padding: 0; border: 4px solid #fac89a; background: #323a4f; color: #f6ebdd; width: min(560px, 94vw); max-height: 92vh; }
+dialog::backdrop { background: rgba(20, 23, 31, 0.75); }
+dialog form { display: flex; flex-direction: column; gap: 12px; padding: 16px; }
+dialog h2 { margin: -16px -16px 4px; padding: 12px 16px; background: #f0966e; color: #14171f; }
+dialog p { margin: 0; opacity: 0.8; }
+
+label { display: flex; flex-direction: column; gap: 4px; }
+input, select, textarea { font: inherit; padding: 6px 8px; }
+.actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
+
+/* for statements */
+
+#ep-layout { flex: 1; min-height: 0; display: flex; }
+
+#ep-side { width: 260px; flex: none; display: flex; flex-direction: column; gap: 12px; padding: 12px; background: #1d222e; color: #f6ebdd; }
+#ep-list { flex: 1; overflow: auto; display: flex; flex-direction: column; gap: 8px; }
+.ep { text-align: left; }
+.ep.on { background: #55adb6; }
+.refno { margin-right: 8px; opacity: 0.7; }
+
+#ep-form { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; padding: 16px; }
+.ep-head { display: flex; flex-wrap: wrap; gap: 12px; }
+.ep-head .num { width: 100px; }
+.ep-head .grow { flex: 1; min-width: 150px; }
+#ep-text { flex: 1; resize: none; font: 18px/1.4 monospace; padding: 12px; }
+#ep-empty { flex: 1; align-self: center; text-align: center; opacity: 0.7; }
+
+
+
+#cp { width: 300px; flex: none; display: flex; flex-direction: column; gap: 10px; padding: 12px; background: #1d222e; color: #f6ebdd; }
+#cp h3 { margin: 8px 0 0; font-size: 14px; }
+#cp-tagged { max-height: 30%; overflow: auto; display: flex; flex-direction: column; gap: 8px; }
+#cp-list { flex: 1; min-height: 80px; overflow: auto; display: flex; flex-direction: column; gap: 8px; }
+.cp-tools { display: flex; gap: 8px; }
+
+.cp-item { display: flex; flex-direction: column; align-items: flex-start; width: 100%; text-align: left; border-left: 8px solid #556787; }
+.cp-item span { opacity: 0.7; font-size: 13px; }
+.rel { display: flex; align-items: center; gap: 8px; }
+.rel .cp-item { flex: 1; }
+
+#stamp { align-self: flex-start; padding: 4px 10px; border: 3px double #f25e45; color: #f25e45; font-weight: bold; transform: rotate(-4deg); }
+#stamp.off { border-color: #8a7a62; color: #8a7a62; }
+
+/* for realtionshipss */
+.rel-add { display: flex; gap: 8px; margin: 8px 0; }
+.rel-add input { flex: 1; min-width: 0; }
+#ent-rel h3 { margin: 12px 0 6px; font-size: 14px; }
+#rel-list, #app-list { display: flex; flex-direction: column; gap: 8px; }
+
+
+#ent-back { margin-right: auto; }
+
+
+/* for the home page */
+
+.scroll { flex: 1; overflow: auto; padding: 8px 24px 24px; }
+.scroll h3 { margin: 24px 0 10px; }
+#hero { padding: 16px; margin-top: 16px; max-width: 760px; background: #323a4f; color: #f6ebdd; }
+#hero h2 { margin: 0 0 6px; }
+#hero p { margin: 0; }
+
+#tiles { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.drawer { display: flex; justify-content: space-between; align-items: center; padding: 16px; text-align: left; background: #3b4766; color: #f6ebdd; }
+.drawer span { font-size: 22px; }
+
+.row { display: flex; flex-direction: column; align-items: flex-start; width: 100%; margin-bottom: 10px; text-align: left; }
+.row span { opacity: 0.7; font-size: 14px; }
+#home-results, #resume, #recent { max-width: 680px; }
+
+
+/* for fears */
+
+.fears { display: flex; flex-wrap: wrap; gap: 6px; }
+.fearchip { flex-direction: row; align-items: center; gap: 6px; padding: 4px 8px; border: 2px solid #556787; cursor: pointer; font-size: 14px; }
+.fearchip:has(input:checked) { background: #f0966e; color: #14171f; border-color: #14171f; }
+
+
+/* MINOR CARDS */
+
+.fcard.minor { opacity: 0.65; }
+.check { flex-direction: row; align-items: center; gap: 8px; }
+
+
+/* PIXEL STUFF */
+.pixel-art {
+  /* Prevent browser smoothing and keep pixel edges perfectly sharp */
+  image-rendering: pixelated;
+  
+  /* Fallbacks for older browser versions and cross-platform consistency */
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+
+.pixel-button {
+  background: #f0f0f0;
+  border: 4px solid black;
+  position: relative;
+  padding: 10px 20px;
+  font-family: "Courier New", monospace; /* Or a retro web font */
+}
+
+/* Create the inner pixelated corner cuts using inset box shadows */
+.pixel-button::after {
+  content: "";
+  position: absolute;
+  top: -4px; bottom: -4px; left: -4px; right: -4px;
+  border: 4px solid transparent;
+  /* Box-shadow simulates the retro blocky corners */
+  box-shadow: inset 4px 4px 0 #fff, inset -4px -4px 0 #888;
+  pointer-events: none;
+}
+
+
+/* for the relation map */
+.map-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 8px 16px; background: #1d222e; color: #f6ebdd; }
+.map-tools label { flex-direction: row; align-items: center; gap: 6px; }
+#map-info { flex: 1 1 100%; opacity: 0.8; }   /* the sentence gets its own line under the controls */
+#map-legend { display: flex; flex-wrap: wrap; gap: 8px; padding: 6px 16px; background: #1d222e; color: #f6ebdd; }
+#map-legend:empty { display: none; }
+.legend-chip { padding: 2px 8px; border-left: 8px solid #556787; font-size: 13px; background: #323a4f; }
+#map-wrap { flex: 1; min-height: 0; position: relative; overflow: hidden; background: #1d222e; }
+#map-svg { display: block; width: 100%; height: 100%; cursor: grab; }
+#map-svg.panning { cursor: grabbing; }
+#map-empty { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: #f6ebdd; opacity: 0.7; }
+
+.mnode { cursor: pointer; }
+.mnode rect { stroke: #14171f; stroke-width: 2; }
+.mnode.focus rect { stroke: #f6ebdd; stroke-width: 4; }
+.mnode.minor { opacity: 0.65; }
+.mnode text { font: 13px sans-serif; fill: #14171f; text-anchor: middle; pointer-events: none; }
+.medge line { stroke: #8e97ab; stroke-width: 2; }
+.medge text { font: 12px sans-serif; fill: #f6ebdd; text-anchor: middle; paint-order: stroke; stroke: #1d222e; stroke-width: 4px; pointer-events: none; }
+/* pointing at a box dims everything except it and its links */
+#map-svg.hovering .mnode:not(.lit), #map-svg.hovering .medge:not(.lit) { opacity: 0.15; }
+#map-svg.hovering .medge.lit line { stroke: #f0966e; }
+
+
+/* for the timeline */
+#tl-filters { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 16px 0; }
+.tl-year { margin: 28px 0 8px; padding-bottom: 4px; border-bottom: 2px solid #556787; }
+.tl-note { margin: 0 0 10px; opacity: 0.7; font-size: 14px; }
+.tl-item { display: grid; grid-template-columns: 190px 1fr; align-items: baseline; gap: 12px; width: 100%; max-width: 760px;
+  margin-bottom: 8px; padding: 8px 12px; text-align: left; background: #f6ebdd; color: #14171f; border: none; border-left: 8px solid #556787; cursor: pointer; }
+.tl-when { font-weight: bold; }
+.tl-text { display: flex; flex-direction: column; }
+.tl-text span { opacity: 0.7; font-size: 13px; }

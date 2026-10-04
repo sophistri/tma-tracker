@@ -1,0 +1,30 @@
+{
+  "name": "tma-tracker",
+  "version": "1.0.0",
+  "description": "personal tracker to follow along with the magnus archives",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \\\"Error: no test specified\\\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sophistri/tma-tracker.git"
+  },
+  "keywords": [
+    "tma"
+  ],
+  "author": "sophistri",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sophistri/tma-tracker/issues"
+  },
+  "homepage": "https://github.com/sophistri/tma-tracker#readme",
+  "devDependencies": {
+    "electron": "^44.5.1",
+    "electron-builder": "^26.15.3"
+  },
+  "dependencies": {
+    "mongodb": "^7.7.0"
+  }
+}

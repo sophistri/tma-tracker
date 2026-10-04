@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
+  <title>The Archive</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <aside id="side">
+    <h1>The Archive</h1>
+    <nav id="nav">
+      <button data-view="home" class="on">Reading room</button>
+      <button data-view="transcripts">Statements</button>
+      <button data-view="archive">Catalog</button>
+      <button data-view="map">Relation map</button>
+      <button data-view="timeline">Timeline</button>
+    </nav>
+  </aside>
+
+  <main id="content">
+    <div id="dbbar" hidden>
+      <span id="db-msg"></span>
+      <button id="db-retry">Retry</button>
+    </div>
+
+    <section id="view-home" class="view">
+      <div class="bar">
+        <h2>Reading room</h2>
+        <input id="home-search" type="search" placeholder="Search entries and statements" />
+      </div>
+      <div class="scroll">
+        <div id="home-results" hidden></div>
+        <div id="home-main">
+          <div id="hero">
+            <h2>Welcome back, Archivist</h2>
+            <p id="hero-sub"></p>
+          </div>
+          <h3>The drawers</h3>
+          <div id="tiles"></div>
+          <h3>Continue reading</h3>
+          <div id="resume"></div>
+          <h3>Recently filed</h3>
+          <div id="recent"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-transcripts" class="view" hidden>
+      <div class="bar"><h2>Statements</h2></div>
+      <div id="ep-layout">
+        <div id="ep-side">
+          <input id="ep-search" type="search" placeholder="Search titles and text" />
+          <button id="ep-new">+ New statement</button>
+          <div id="ep-list"></div>
+        </div>
+
+        <form id="ep-form" hidden>
+
+          <span id="stamp"></span>
+
+          <div class="ep-head">
+            <label class="num">No. <input name="number" type="number" min="0" /></label>
+            <label class="num">Season <input name="season" type="number" min="0" /></label>
+            <label class="grow">Title <input name="title" required maxlength="120" /></label>
+          </div>
+          <div class="ep-head">
+            <label class="grow">Statement giver <input name="giver" maxlength="80" /></label>
+            <label class="grow">Subject <input name="subject" maxlength="120" /></label>
+            <div class="grow">Fears <div class="fears" id="ep-fears"></div></div>
+          </div>
+          <div class="ep-head">
+            <label class="grow">Statement given on <input name="statementDate" maxlength="60"/></label>
+            <label class="grow">Events took place on <input name="actualDate" maxlength="60"/></label>
+          </div>
+          <textarea id="ep-text" name="text" placeholder="Paste the transcript here"></textarea>
+          <div class="actions">
+            <button type="button" id="ep-delete">Delete</button>
+            <button type="submit">Save statement</button>
+          </div>
+        </form>
+
+        <div id="ep-empty">Pick a statement from the shelf, or add a new one.</div>
+
+        <aside id="cp" hidden>
+          <h3>Indexed in this statement</h3>
+          <div id="cp-tagged"></div>
+          <h3>Index an entry</h3>
+          <input id="cp-search" type="search" placeholder="Find an entry" />
+          <div id="cp-list"></div>
+          <div class="cp-tools">
+            <select id="cp-type"></select>
+            <button id="cp-new" title="Select a name in the transcript first to pre-fill it">+ New</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+    
+    <section id="view-archive" class="view" hidden>
+      <div class="bar">
+        <h2>Catalog</h2>
+        <input id="cat-search" type="search" placeholder="Search the catalog" />
+        <button id="cat-minor"></button>
+        <button id="cat-new">+ New entry</button>
+      </div> 
+      <!-- placeholders that catalog.js fills. -->
+      <div id="cat-chips"></div>
+      <div id="cat-letters"></div>
+      <div id="cat-list"></div>
+    </section>
+
+    <section id="view-map" class="view" hidden>
+      <div class="bar">
+        <h2>Relation map</h2>
+        <input id="map-focus" list="ent-names" placeholder="Focus on an entry (blank = everything)" />
+      </div>
+      <div class="map-tools">
+        <label>Reach <select id="map-depth">
+          <option value="1">1 link away</option>
+          <option value="2">2 links away</option>
+          <option value="3">3 links away</option>
+        </select></label>
+        <label>Type <select id="map-type"></select></label>
+        <label class="check"><input type="checkbox" id="map-unlinked" /> Include unlinked entries</label>
+        <button id="map-open" hidden>Open entry</button>
+        <button id="map-clear" hidden>Show everything</button>
+        <span id="map-info"></span>
+      </div>
+      <div id="map-legend"></div>
+      <div id="map-wrap">
+        <svg id="map-svg"></svg>
+        <p id="map-empty" hidden>No links to draw yet. Add some under an entry's Cross-references.</p>
+      </div>
+    </section>
+
+    <section id="view-timeline" class="view" hidden>
+      <div class="bar">
+        <h2>Timeline</h2>
+        <select id="tl-mode">
+          <option value="time">Chronological</option>
+          <option value="episodes">Episode order</option>
+        </select>
+      </div>
+      <div id="tl-filters"></div>
+      <div class="scroll"><div id="tl-list"></div></div>
+    </section>
+
+  </main>
+
+  <div id="toast" popover="manual"></div>
+  
+
+
+
+
+  <dialog id="ent-dialog">
+    <form id="ent-form">
+      <h2 id="ent-title">New entry</h2>
+      <p id="ent-meta"></p>
+      <label>Type <select name="type"></select></label>
+      <div>Fears <div class="fears" id="ent-fears"></div></div>
+      <label>Name <input name="name" required maxlength="60" /></label>
+      <label>Summary <input name="summary" maxlength="120" placeholder="One line, e.g. Head Archivist" /></label>
+      <div id="ent-fields"></div>
+      <label>Tags (comma separated) <input name="tags" maxlength="120" placeholder="e.g. smoker, missing-person" /></label>
+      <label class="check"><input type="checkbox" name="minor" /> Minor entry: listed last, can be hidden</label>
+      <label>Notes <textarea name="notes" rows="5"></textarea></label>
+      <div id="ent-rel" hidden>
+        <h3>Cross-references</h3>
+        <div id="rel-list"></div>
+        <div class="rel-add">
+          <input id="rel-target" list="ent-names" placeholder="Other entry" />
+          <input id="rel-kind" list="kinds" placeholder="Relationship" />
+          <button type="button" id="rel-add">Add</button>
+        </div>
+        <h3>Appears in</h3>
+        <div id="app-list"></div>
+      </div>
+      <div class="actions">
+        <button type="button" id="ent-back" hidden>← Back</button>
+        <button type="button" id="ent-map" hidden>Show on map</button>
+        <button type="button" id="ent-delete">Delete</button>
+        <button type="button" id="ent-cancel">Cancel</button>
+        <button type="submit">Save entry</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="confirm-dialog">
+    <form id="confirm-form">
+      <h2>Are you sure?</h2>
+      <p id="confirm-msg"></p>
+      <div class="actions">
+        <button type="button" id="confirm-cancel">Cancel</button>
+        <button type="submit">OK</button>
+      </div>
+    </form>
+  </dialog>
+
+
+  <datalist id="ent-names"></datalist>
+  <datalist id="kinds"></datalist>
+
+
+  <script src="src/renderer/util.js"></script>
+  <script src="src/renderer/config.js"></script>
+  <script src="src/renderer/fears.js"></script>
+  <script src="src/renderer/state.js"></script>
+  <script src="src/renderer/catalog.js"></script>
+  <script src="src/renderer/editor.js"></script>
+  <script src="src/renderer/statements.js"></script>
+  <script src="src/renderer/indexing.js"></script>
+  <script src="src/renderer/home.js"></script>
+  <script src="src/renderer/relmap.js"></script>
+  <script src="src/renderer/timeline.js"></script>
+  <script src="src/renderer/app.js"></script>
+</body>
+</html>
