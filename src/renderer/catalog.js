@@ -72,7 +72,7 @@ function renderCatalog() {
     .sort((a, b) => a.name.localeCompare(b.name))
     .sort(byImportance);
   $('cat-list').replaceChildren(...rows.map(card));
-  $('cat-minor').textContent = showMinor ? 'Minor entries: shown' : 'Minor entries: hidden';
+  updateCatalogMinorButton();
   if (!rows.length) $('cat-list').append(el('p', 'empty', 'Nothing filed here yet.'));
 }
 
@@ -85,14 +85,27 @@ function gotoCatalog(type) {
   show('archive');
 }
 
+// DO WE SHOW MINOR ENTRIES OR NO
 
 let showMinor = store.get('showMinor') !== 'no';
+
+function updateCatalogMinorButton() {
+  const btn = $('cat-minor');
+  if (!btn) return;
+  btn.textContent = showMinor ? 'Minor entries: shown' : 'Minor entries: hidden';
+  btn.classList.toggle('on', !showMinor); // Highlight when hiding minor entries
+}
 
 $('cat-minor').onclick = () => {
   showMinor = !showMinor;
   store.set('showMinor', showMinor ? 'yes' : 'no');
+  updateCatalogMinorButton();
   renderCatalog();
 };
+
+// Initialize the button text and state immediately on file load
+updateCatalogMinorButton();
+
 
 $('cat-search').oninput = renderCatalog;
 $('cat-new').onclick = () => openEntry({ type: catType === 'all' ? 'person' : catType });

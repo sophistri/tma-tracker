@@ -155,3 +155,6 @@ const dateOf = (e) => new Date(e.updatedAt || e.createdAt || 0).getTime();
 
 const isMinor = (e) => (e.tags || []).includes('minor');
 const byImportance = (a, b) => (isMinor(a) - isMinor(b)) || byName(a, b);   // minor entries go last
+
+
+

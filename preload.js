@@ -17,4 +17,17 @@ contextBridge.exposeInMainWorld('api', {
   getEpisode: (id) => ipcRenderer.invoke('get-episode', id),
   saveEpisode: (ep) => ipcRenderer.invoke('save-episode', ep),
   deleteEpisode: (id) => ipcRenderer.invoke('delete-episode', id),
+  importTranscripts: (opts) => ipcRenderer.invoke('import-transcripts', opts),
+
+  importTranscriptsFolder: (opts) => ipcRenderer.invoke('import-transcripts-folder', opts),
+  downloadTranscriptsOnline: (opts) => ipcRenderer.invoke('download-transcripts-online', opts),
+  onImportProgress: (cb) => {
+    const handler = (_event, val) => cb(val);
+    ipcRenderer.on('import-progress', handler);
+    return () => ipcRenderer.removeListener('import-progress', handler);
+  },
+
+  minimize: () => ipcRenderer.send('win:minimize'),
+  maximize: () => ipcRenderer.send('win:maximize'),
+  close:    () => ipcRenderer.send('win:close'),
 });

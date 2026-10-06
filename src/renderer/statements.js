@@ -28,6 +28,7 @@ function showEpForm(ep = {}) {
   f.title.value = ep.title || '';
   f.giver.value = ep.giver || '';
   f.subject.value = ep.subject || '';
+  f.caseNo.value = ep.caseNo || '';
   setFears($('ep-fears'), ep.fears);
   f.text.value = ep.text || '';
   f.statementDate.value = ep.statementDate || '';
@@ -94,6 +95,70 @@ $('ep-delete').onclick = async () => {
   loadEpisodes();
 };
 
+
+// ---- import transcripts (Shift-click replaces transcripts that already have text) ----
+const importDialog = $('import-dialog');
+const progWrap = $('import-prog-wrap');
+const progFill = $('import-prog-fill');
+const progText = $('import-status-text');
+const actionsWrap = $('import-actions');
+const overwriteCheckbox = $('import-overwrite');
+
+// Open the dialog
+$('ep-import').onclick = (ev) => {
+  // If user held Shift when clicking, pre-check the box
+  if (overwriteCheckbox) {
+    overwriteCheckbox.checked = ev.shiftKey;
+  }
+  progWrap.hidden = true;
+  actionsWrap.hidden = false;
+  progFill.style.width = '0%';
+  importDialog.showModal();
+};
+
+$('btn-import-cancel').onclick = () => importDialog.close();
+
+// Option A: Download from GitHub
+$('btn-import-web').onclick = async () => {
+  const overwrite = !!(overwriteCheckbox && overwriteCheckbox.checked);
+
+  actionsWrap.hidden = true;
+  progWrap.hidden = false;
+  progText.textContent = 'Contacting GitHub archive...';
+
+  try {
+    const res = await window.api.downloadTranscriptsOnline({ overwrite });
+    importDialog.close();
+    toast(`Done! Imported ${res.imported} statements.`);
+    await loadEpisodes();
+    if (epId) {
+      const ep = await call('getEpisode', epId);
+      if (ep) showEpForm(ep);
+    }
+  } catch (err) {
+    alert('Download failed: ' + err.message);
+    importDialog.close();
+  }
+};
+
+// Option B: Local Folder
+$('btn-import-folder').onclick = async () => {
+  const overwrite = !!(overwriteCheckbox && overwriteCheckbox.checked);
+  importDialog.close();
+
+  try {
+    const res = await window.api.importTranscriptsFolder({ overwrite });
+    if (!res) return;
+    toast(`Imported ${res.imported} statements from folder.`);
+    await loadEpisodes();
+    if (epId) {
+      const ep = await call('getEpisode', epId);
+      if (ep) showEpForm(ep);
+    }
+  } catch (err) {
+    alert('Import failed: ' + err.message);
+  }
+};
 
 // helper to jump from entry to a statement 
 async function gotoStatement(id) {

@@ -5,6 +5,7 @@ let mapFocus = null;      // _id of the entry the map is centred on; null means 
 let mapDepth = 1;         // how many links away from the focused entry to include
 let mapType = 'all';      // only show this type of entry ('all' or a key of TYPES)
 let mapUnlinked = false;  // include entries that have no links at all (whole-archive mode only)
+let mapMinor = store.get('mapMinor') !== 'no'; // independent setting, defaults to true
 let mapFit = { x: 0, y: 0, w: 1000, h: 700 };   // the view that fits everything: the Fit button goes back to it
 let mapBox = { x: 0, y: 0, w: 1000, h: 700 };   // the part of the drawing you can currently see (the SVG viewBox)
 
@@ -33,8 +34,8 @@ function focusMap(id) {
 function mapGraph() {
   const byId = new Map(S.entities.map((e) => [e._id, e]));
   const edges = S.links.filter((l) => byId.has(l.a) && byId.has(l.b));
-  // minor entries follow the same show/hide switch as the catalog
-  const allowed = (e) => (showMinor || !isMinor(e)) && (mapType === 'all' || e.type === mapType);
+  // minor entries follow the map's own show/hide switch
+  const allowed = (e) => (mapMinor || !isMinor(e)) && (mapType === 'all' || e.type === mapType);
 
   // focused: walk outwards from the entry, one link at a time, up to mapDepth steps
   if (mapFocus && byId.has(mapFocus)) {
@@ -227,10 +228,9 @@ function renderMap() {
     o.value = entryLabel(x);
     return o;
   }));
-  $('map-type').replaceChildren(new Option('All types', 'all'), ...Object.entries(TYPES).map(([key, t]) => new Option(t.label, key)));
-  $('map-type').value = mapType;
-  $('map-depth').value = String(mapDepth);
-  $('map-unlinked').checked = mapUnlinked;
+  $('map-type').replaceChildren(new Option('All types', 'all'), ...Object.entries(TYPES).map(([key, t]) => new Option(t.label, key)));$('map-type').value = mapType;
+  $('map-depth').value = String(mapDepth);$('map-unlinked').checked = mapUnlinked;
+  if ($('map-minor'))$('map-minor').checked = mapMinor;
   $('map-focus').value = mapFocus && entById(mapFocus) ? entryLabel(entById(mapFocus)) : '';
   $('map-depth').disabled = !mapFocus;
   $('map-unlinked').disabled = !!mapFocus;
@@ -362,8 +362,7 @@ $('map-svg').addEventListener('wheel', (ev) => {
 // the buttons zoom around the middle of what you can see
 const zoomMiddle = (k) => zoomAt(mapBox.x + mapBox.w / 2, mapBox.y + mapBox.h / 2, k);
 $('map-zoom-in').onclick = () => zoomMiddle(0.8);
-$('map-zoom-out').onclick = () => zoomMiddle(1 / 0.8);
-$('map-fit').onclick = () => { mapBox = { ...mapFit }; applyBox(); };
+$('map-zoom-out').onclick = () => zoomMiddle(1 / 0.8);$('map-fit').onclick = () => { mapBox = { ...mapFit }; applyBox(); };
 
 $('map-svg').addEventListener('mousedown', (ev) => {
   if (ev.button !== 0 || ev.target.closest('.mnode')) return;
@@ -398,7 +397,12 @@ $('map-focus').addEventListener('change', () => {
   renderMap();
 });
 $('map-depth').onchange = () => { mapDepth = Number($('map-depth').value); renderMap(); };
-$('map-type').onchange = () => { mapType = $('map-type').value; renderMap(); };
-$('map-unlinked').onchange = () => { mapUnlinked = $('map-unlinked').checked; renderMap(); };
-$('map-clear').onclick = () => { mapFocus = null; renderMap(); };
-$('map-open').onclick = () => { if (entById(mapFocus)) openEntry(entById(mapFocus)); };
+$('map-type').onchange = () => { mapType =$('map-type').value; renderMap(); };
+$('map-unlinked').onchange = () => { mapUnlinked =$('map-unlinked').checked; renderMap(); };
+if ($('map-minor')) {$('map-minor').onchange = () => {
+    mapMinor = $('map-minor').checked;
+    store.set('mapMinor', mapMinor ? 'yes' : 'no');
+    renderMap();
+  };
+}
+$('map-clear').onclick = () => { mapFocus = null; renderMap(); };$('map-open').onclick = () => { if (entById(mapFocus)) openEntry(entById(mapFocus)); };
